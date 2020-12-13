@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:hyper_garage_sale/models/sale_item.dart';
 import 'package:hyper_garage_sale/models/user_profile.dart';
+import 'package:hyper_garage_sale/models/constants.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:geolocator/geolocator.dart';
@@ -32,7 +33,8 @@ class _BrowsePostsState extends State<BrowsePosts> {
                   description: data['description'],
                   price: data['price'].toDouble(),
                   address: data['address'],
-                  position: Position(
+                  category: data['category'],
+                  position: data['position'] == null ? null : Position(
                     longitude: data['position']['longitude'],
                     latitude: data['position']['latitude'].toDouble(),
                   ),
@@ -72,13 +74,15 @@ class _Tile extends StatefulWidget {
 
 class __TileState extends State<_Tile> {
   double distance;
+  final Constants _constants = Constants();
 
   @override
   void initState() {
-    print('user: ');
-    print(widget.userProfile.currentPosition.toJson());
-    print('item: ');
-    print(widget.saleItem.position.toJson());
+    if (widget.userProfile.currentPosition == null || widget.saleItem.position == null) {
+      distance = -1;
+      print('distance is null');
+      return;
+    }
     distance = Geolocator.distanceBetween(
         widget.userProfile.currentPosition.latitude,
         widget.userProfile.currentPosition.longitude,
@@ -141,9 +145,18 @@ class __TileState extends State<_Tile> {
                 padding: const EdgeInsets.all(4.0),
                 child: Column(
                   children: <Widget>[
-                    Text(
-                      widget.saleItem.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          SizedBox(child: _constants.catergoryToIcon[widget.saleItem.category], height: 20),
+                          Text(
+                            widget.saleItem.title,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                     distance == null ? CircularProgressIndicator(): FittedBox(
                       fit: BoxFit.scaleDown,
@@ -151,7 +164,7 @@ class __TileState extends State<_Tile> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Icon(Icons.location_pin),
-                          Text('within ' + (distance/1600).toStringAsFixed(1) + ' miles'),
+                          Text(distance > 0 ? 'within ' + (distance/1600).toStringAsFixed(1) + ' miles' : 'unknown distance'),
                         ],
                       ),
                     ),

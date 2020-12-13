@@ -4,8 +4,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 
 class ImageCarousal extends StatefulWidget {
   List<String> imageUrls;
+  final void Function(String) onImageTap;
 
-  ImageCarousal({this.imageUrls});
+  ImageCarousal({this.imageUrls, this.onImageTap});
 
   @override
   _ImageCarousalState createState() => _ImageCarousalState();
@@ -23,7 +24,13 @@ class _ImageCarousalState extends State<ImageCarousal> {
             borderRadius: BorderRadius.all(Radius.circular(5.0)),
             child: Stack(
               children: <Widget>[
-                Image.network(item, fit: BoxFit.fill),
+                GestureDetector(
+                  child: Image.network(item, fit: BoxFit.fill),
+                  onTap: (){
+                    widget.onImageTap(item);
+                    print('tap');
+                    },
+                ),
               ],
             )
         ),
@@ -35,8 +42,8 @@ class _ImageCarousalState extends State<ImageCarousal> {
         CarouselSlider(
           items: imageSliders,
           options: CarouselOptions(
-              autoPlay: true,
               enlargeCenterPage: true,
+              autoPlay: true,
               onPageChanged: (index, reason) {
                 setState(() {
                   _current = index;

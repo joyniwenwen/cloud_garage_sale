@@ -50,7 +50,7 @@ class CameraBoxesState extends State<CameraBoxes> {
       ),
       child: FlatButton(
         onPressed: (){
-          _imgFromGallery(index);
+          _imgFromCamera(index);
         },
         child:  SizedBox.expand(child: _images[index] == null ? Icon(Icons.image) : Image.file(File( _images[index].path), fit: BoxFit.fill)),
       ),

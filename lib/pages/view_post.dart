@@ -12,7 +12,6 @@ class ViewPost extends StatefulWidget {
 class _ViewPostState extends State<ViewPost> {
   Map _data = {};
   Completer<GoogleMapController> _controller = Completer();
-  static const LatLng _center = const LatLng(45.521563, -122.677433);
 
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
@@ -27,8 +26,6 @@ class _ViewPostState extends State<ViewPost> {
     if (saleItem.imageUrls.length <= 0) {
       images.add('https://www.thermaxglobal.com/wp-content/uploads/2020/05/image-not-found.jpg');
     }
-    print(saleItem.address);
-    print(saleItem.position);
     return Scaffold(
       appBar: AppBar(
         title: Text('View Post'),
@@ -38,7 +35,11 @@ class _ViewPostState extends State<ViewPost> {
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              ImageCarousal(imageUrls:images),
+              ImageCarousal(imageUrls:images, onImageTap: (String tappedImageUrl){
+                Navigator.pushNamed(context, '/image_detail', arguments: {
+                  'url': tappedImageUrl,
+                });
+              }),
               SizedBox(height: 20),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,7 +98,7 @@ class _ViewPostState extends State<ViewPost> {
                       Text(
                         saleItem.ownerEmail,
                         style: TextStyle(
-                          color: Colors.grey[400],
+                          color: Colors.amberAccent[200],
                           fontSize: 18,
                           letterSpacing: 1,
                         ),
@@ -133,7 +134,15 @@ class _ViewPostState extends State<ViewPost> {
                   SizedBox(height: 10),
                   SizedBox(
                     height: 400,
-                    child: GoogleMap(
+                    child: saleItem.position == null ? Text(
+                      "Unavailable",
+                      style: TextStyle(
+                        color: Colors.amberAccent[200],
+                        letterSpacing: 2,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ) : GoogleMap(
                       markers: Set<Marker>.of([
                         Marker(
                           markerId: MarkerId('item location'),

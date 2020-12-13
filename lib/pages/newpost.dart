@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:hyper_garage_sale/models/storage.dart';
 import 'package:hyper_garage_sale/models/sale_item.dart';
+import 'package:hyper_garage_sale/models/constants.dart';
 import 'package:hyper_garage_sale/components/camera_boxes.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:uuid/uuid.dart';
@@ -47,6 +48,10 @@ class _NewPostFormState extends State<NewPostForm> {
   void initState() {
     super.initState();
     _sale_item.ownerEmail = widget.userProfile.email;
+    if (widget.userProfile.currentPosition != null) {
+      _sale_item.address = widget.userProfile.currentAddress;
+      _sale_item.position = widget.userProfile.currentPosition;
+    }
   }
 
   // Check if form is valid before perform login or signup
@@ -92,8 +97,8 @@ class _NewPostFormState extends State<NewPostForm> {
         'imageUrls': _sale_item.imageUrls,
         'category': _sale_item.category,
         'ownerEmail': _sale_item.ownerEmail,
-        'position': _sale_item.position.toJson(),
-        'address': _sale_item.address.toString(),
+        'position': _sale_item.position == null ? null : _sale_item.position.toJson(),
+        'address': _sale_item.address == null ? null : _sale_item.address.toString(),
       }).then((_){
         Navigator.pop(context);
         widget.addNewpostCallback();
@@ -101,18 +106,12 @@ class _NewPostFormState extends State<NewPostForm> {
         Navigator.pop(context);
         print(error);
       });
+    } else {
+      Navigator.pop(context);
     }
   }
 
-  final Map<String, Image> _catergoryToIcon = {
-    "Clothes": Image.network("https://img.icons8.com/plasticine/64/000000/clothes.png"),
-    "Electronics": Image.network("https://img.icons8.com/fluent/64/000000/laptop.png"),
-    "Tools": Image.network("https://img.icons8.com/doodle/64/000000/screwdriver--v1.png"),
-    "Books": Image.network("https://img.icons8.com/plasticine/64/000000/apple-books.png"),
-    "Furniture": Image.network("https://img.icons8.com/dusk/64/000000/sofa.png"),
-    "Toys": Image.network("https://img.icons8.com/cute-clipart/64/000000/toy-train.png"),
-    "Other": Image.network("https://img.icons8.com/nolan/64/question-mark.png"),
-  };
+  final Constants _constants = Constants();
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +127,7 @@ class _NewPostFormState extends State<NewPostForm> {
               ),
               child: DropdownButtonFormField(
                 onChanged: (value)=>{},
-                items:  _catergoryToIcon.entries.map(
+                items:  _constants.catergoryToIcon.entries.map(
                         (entry) {
                       return DropdownMenuItem<String>(
                         value: entry.key,

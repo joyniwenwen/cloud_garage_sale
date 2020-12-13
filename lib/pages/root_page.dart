@@ -25,9 +25,9 @@ class _RootPageState extends State<RootPage> {
   String _userId = "";
   String _email = "";
 
-  // final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
   Position _currentPosition;
   String _currentAddress;
+  bool _positionDone = false;
 
   void _getCurrentLocation() {
     Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
@@ -47,10 +47,21 @@ class _RootPageState extends State<RootPage> {
                 "${place.name}, ${place.locality}, ${place
                     .administrativeArea}, ${place.postalCode}, ${place
                     .country}";
+                _positionDone = true;
               });
             }
           }
-      ).catchError((e) => print(e));
+      ).catchError((e) {
+        setState(() {
+          _positionDone = true;
+        });
+        print(e);
+      });
+    }).catchError((e) {
+      setState(() {
+        _positionDone = true;
+      });
+      print(e);
     });
   }
 
@@ -112,14 +123,13 @@ class _RootPageState extends State<RootPage> {
         );
         break;
       case AuthStatus.LOGGED_IN:
-        if (_userId.length > 0 && _userId != null && _currentAddress != null && _currentPosition != null) {
+        if (_userId.length > 0 && _userId != null && _positionDone) {
           UserProfile userProfile = UserProfile(
               userId: _userId,
               email: _email,
               currentAddress: _currentAddress,
               currentPosition: _currentPosition
           );
-          print(userProfile.currentAddress);
           return AppNavigation(
             logoutCallback: logoutCallback,
             userProfile: userProfile
